@@ -1,0 +1,21 @@
+pkgname=$APP_NAME
+pkgver=will-be-overwritten-anyway
+pkgrel=1
+arch=("i686")
+source=('hg+file://$APP_NAME')
+depends=('gcc-libs')
+md5sums=('SKIP')
+function pkgver() {
+	cd "$pkgname"
+	printf "r%s.%s" "$(hg identify -n)" "$(hg identify -i | cut -c 1-4)"
+}
+
+function package() {
+	cd ${srcdir}/${pkgname}
+	make DESTDIR="${pkgdir}" install
+}
+
+function build() {
+        cd ${srcdir}/${pkgname}
+        make
+}
