@@ -1,0 +1,52 @@
+#cloud-config
+
+coreos:
+  update:
+    reboot-strategy: off
+  etcd:
+    addr: $public_ipv4:$ETCD_PORT
+    peers: ""
+    peer-bind-addr: "127.0.0.1"
+  fleet:
+    metadata: registry=yes
+    etcd_servers: "http://127.0.0.1:$ETCD_PORT"
+    agent_ttl: "120s"
+  units:
+    - name: fleet.service
+      command: start
+    - name: ntpd.service
+      command: stop
+      mask: yes
+    - name: systemd-timesyncd.service
+      command: start
+      drop-ins:
+        - name: 50-enable-in-vm.conf
+          content: |
+            [Unit]
+            ConditionVirtualization=
+    - name: sshd.socket
+      command: start
+      content: |
+        [Socket]
+        ListenStream=$SSH_PORT
+        Accept=yes
+
+write_files:
+  - path: /etc/ssh/sshd_config
+    permissions: 0600
+    owner: root:root
+    content: |
+      # Use most defaults for sshd configuration.
+      UsePrivilegeSeparation sandbox
+      Subsystem sftp internal-sftp
+      ClientAliveInterval 180
+      UseDNS no
+
+      PermitRootLogin no
+      AllowUsers core
+      PasswordAuthentication no
+      ChallengeResponseAuthentication no
+  - path: /etc/systemd/network/01-no-llmnr.conf
+    content: |
+      [Network]
+      LLMNR=false

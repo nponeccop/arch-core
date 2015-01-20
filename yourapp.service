@@ -1,0 +1,15 @@
+[Unit]
+Description=$DESCRIPTION
+After=docker.service
+Requires=docker.service
+
+[Service]
+TimeoutStartSec=0
+RestartSec=120s
+Restart=always
+ExecStart=/usr/bin/docker run --rm --name $APP_NAME -p $APP_PORT:$APP_PORT $REGISTRY_IP:$REGISTRY_PORT/$APP_NAME
+ExecStop=/usr/bin/docker stop $APP_NAME
+
+[X-Fleet]
+Global=true
+

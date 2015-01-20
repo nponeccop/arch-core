@@ -1,0 +1,12 @@
+[Unit]
+Description=Private Docker Registry
+After=docker.service
+Requires=docker.service
+
+[Service]
+TimeoutStartSec=0
+ExecStart=/usr/bin/docker run --rm --name registry -e SEARCH_BACKEND= -p $REGISTRY_PORT:5000 registry
+ExecStop=/usr/bin/docker stop registry
+
+[X-Fleet]
+MachineMetadata=registry=yes
