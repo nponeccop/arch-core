@@ -2,7 +2,7 @@
 
 A manual and helper scripts for a minimal CoreOS + ArchLinux i686 setup
 
-## Getting started
+## Getting Started
 
 Proposed workflow:
 
@@ -36,3 +36,21 @@ Features:
 - a sample `PKGBUILD` pulling version tags from a local Mercurial DB
 - `archlinux-base.sh` to build a base archlinux-i686 image.
 - `pacstrap.sh` to build a minimal image using a novel approach: the image doesn't include base so it's truly minimal!
+- a helper `docker-builder` image to serve as Arch-based `toolbox`
+- a script for API-based fully automated provision of more slave nodes
+
+## Used Placeholders
+
+- `$APP_NAME` - a short name used as Archlinux package name, image name, systemd unit name, container name and folder name of Mercurial source tree.
+- `$DESCRIPTION` - used as Archlinux package description and systemd unit description
+- `$APP_PORT` - TCP port application listens to.
+- `$REGISTRY_PORT`, `$ETCD_PORT`, `$SSH_PORT` - TCP ports to be used for image registry, etcd and sshd.
+- `$REGISTRY_IP` - IP address of the master node. Only used on slave nodes.
+- `[1234, 5678]` - DigitalOcean API numeric ids of SSH keys to add to provisioned nodes
+- `$HOSTNAME` - host name of DigitalOcean node. It also shows up in DigitalOcean control panel, so choose a unique value for each node. It can be either a hostname or a FQDN and it is also used for DigitalOcean reverse DNS record for node IP.
+
+`SEARCH_BACKEND=`, `SKIP`, `DESTDIR` etc are not placeholders
+
+`$TOKEN` is not a placeholder either! Use `read TOKEN; export TOKEN` to paste your personal token to a terminal to avoid your token in shell history and similar logs.
+
+`$public_ipv4` is not a placeholder. Well, it is technically a placeholder, but for DigialOcean API.
