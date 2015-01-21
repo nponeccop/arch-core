@@ -37,21 +37,58 @@ Helper scripts and a manual for a minimal CoreOS + ArchLinux i686 setup
 - Add a CD-ROM drive, put `slave-config.iso` into it.
 - Boot the virtual machine
 
-### VmWare Player - validation of SSH, fleet and etcd setup
-
-- Login using `ssh -P $SSH_PORT core@$public_ipv4`
-- Enter `fleetctl list-machines`. It should show 2 machines.
+Proceed to `CoreOS - Validation` step.
 
 ## CoreOS setup - DigitalOcean
 
 ### DigitalOcean - preparations
 
+- Replace `$ETCD_PORT`, `$SSH_PORT` and `$REGISTRY_PORT` with 3 random integers between 1025 and 65535. Use 4001, 22 and 5000 if you don't care.
+- Add an SSH key to your account
+
 ### DigitalOcean - master node
+
+- Click `Create Droplet`
+- Enter a hostname. Use `registry` if you don't care
+- Choose a region: `ams3` for Europe, `nyc3` for US. Note that not all regions support `User data` feature we need.
+- Choose a size. 512mb is more than enough.
+- Check `User Data` checkbox, paste contents of `user_data.registry.yaml`
+- Create the node. Note its IP in DigitalOcean web control panel.
 
 ### DigitalOcean - slave node
 
-### DigitalOcean - validation of SSH, fleet and etcd setup
+- Replace `$REGISTRY_IP` with IP of the master node.
+- Click `Create Droplet`
+- Enter a hostname. Use `slave` if you don't care
+- Choose a region. You can use a region different than that of the master, but only the one with `User data` support.
+- Choose a size. 512mb is more than enough.
+- Check `User Data` checkbox, paste contents of `user_data.slave.yaml`
+- Create the node.
 
+### DigitalOcean - automation
+
+You can hack `create.sh` to fully automate node creation using DigitalOcean API v2. It needs node.js for proper JSON escaping so it works together with `create.js`. 
+
+Before running `create.sh` you need to get your personal token from DigitalOcean control panel. Use `read TOKEN; export TOKEN` to paste the token to a terminal to avoid your token in shell history and similar logs.
+
+If you are curious, `@` syntax is the feature of `curl` and `<()` is a feature of shell. 
+
+## CoreOS setup - Validation
+
+ At this point steps are the same for all platforms.
+
+- Login using `ssh -P $SSH_PORT core@$public_ipv4`
+- Enter `fleetctl list-machines`. It should show 2 machines.
+
+If both steps succeed - it means that SSH, fleet and etcd work.
+
+## Build system - ArchLinux Pacman Package
+
+## Build system - Docker Image
+
+## Image Registry setup
+
+## Deployment and Updates
 
 ## About The Project
 
