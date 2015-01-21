@@ -6,7 +6,7 @@ A manual and helper scripts for a minimal CoreOS + ArchLinux i686 setup
 
 Proposed workflow:
 
-- An app is built on ArchLinux using a `Makefile` supporting `make` and `make DEST=... install`
+- An app is built on ArchLinux using a `Makefile` supporting `make` and `make DESTDIR=... install`
 - Dependent ArchLinux packages are are specified in `PKGBUILD`
 - The app is packaged into a binary `.pkg.tar.xz` Pacman package versioned by Mercurial revision number and hash.
 - The package and its dependencies are installed into a minimal chroot using `pacman`
