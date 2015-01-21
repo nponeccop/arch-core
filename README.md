@@ -82,13 +82,39 @@ If you are curious, `@` syntax is the feature of `curl` and `<()` is a feature o
 
 If both steps succeed - it means that SSH, fleet and etcd work.
 
+## Image Registry setup
+
+- Upload `registry.service` to the master node using `sftp` or `scp` or terminal copy-paste.
+- Log in to master using ssh and run `fleetctl start registry.service`.
+- Ensure that `fleetctl list-units` shows that `registry` is running.
+
 ## Build system - ArchLinux Pacman Package
+
+- Put your project into `app-image/$APP_NAME`, so `.hg` folder is at `app-image/$APP_NAME/.hg`. 
+- Specify correct dependencies in `depends=`. The syntax is shell array syntax, so `depends=('foo' bar')` works. If in doubt, use `pkgname -r` tool to find which package provides a file.
+- Run `pkgbuild` in `app-image/` folder.
+
+At this point `$APP_NAME-r$rev_num-$rev_hash-$pkgrel.pkg.tar.xz` file should be created. `$pkgrel` is taken from `PKGBUILD` and `$rev_num`/`rev-hash` from Mercurial, to provide a reliable identification of build. Note that the build ignores the working tree completely and only operates on what is stored in `.hg`. So it is impossible to include uncommitted changes by mistake.
 
 ## Build system - Docker Image
 
-## Image Registry setup
+- Run `pacstrap.sh package.pkg.tar.xz`
+- Run `tar --numeric-owner --xattrs --acls -C newroot -c . | docker import - $APP_NAME-intermediate`
+- Smoke-test your application using `docker run --name $APP_NAME-intermediate -ti $APP_NAME-intermediate command_line`. Use other arguments such as `-v` for volumes, `-w` for current directory etc.
+- Run `docker commit $APP_NAME-intermediate $REGISTRY_IP:$REGISTRY_PORT/$APP_NAME:r$rev_num-$rev_hash-$pkgrel`
+- Check that `$REGISTRY_IP:$REGISTRY_PORT/$APP_NAME:r$rev_num-$rev_hash-$pkgrel` appears in `docker images`.
+- Run `docker run --rm $REGISTRY_IP:$REGISTRY_PORT/$APP_NAME:r$rev_num-$rev_hash-$pkgrel` to ensure that `-w` and `command_line` arguments are remembered and no longer necessary. If no testing is necessary, `docker create` steps  can be used instead of `docker run`.
+- Run `docker push $REGISTRY_IP:$REGISTRY_PORT/$APP_NAME:r$rev_num-$rev_hash-$pkgrel`.
 
 ## Deployment and Updates
+
+- Rename `yourapp.service` to `$APP_NAME.service` and upload it to the master node.
+- Run `fleetctl start $APP_NAME.service`
+- Ensure that `fleetctl list-units` shows 2 instances of `$APP_NAME.service` are running - one on master, one on slave.
+
+## archlinux-builder Helper Image
+- Run `docker build -t archlinux-builder` in `docker-builder`
+- Check that `archlinux-builder` image is created using `docker images`
 
 ## About The Project
 
