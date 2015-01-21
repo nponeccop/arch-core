@@ -1,8 +1,59 @@
 # arch-core
 
-A manual and helper scripts for a minimal CoreOS + ArchLinux i686 setup
+Helper scripts and a manual for a minimal CoreOS + ArchLinux i686 setup
 
-## Getting Started
+## CoreOS setup - VmWare Player
+
+### VmWare Player - Preparations
+
+- Download [coreos_production_vmware.vmx](http://stable.release.core-os.net/amd64-usr/current/coreos_production_vmware.vmx) and [coreos_production_vmware_image.vmdk.bz2](http://stable.release.core-os.net/amd64-usr/current/coreos_production_vmware_image.vmdk.bz2).
+- Unpack the latter. As VmWare Player lacks snapshots, save original `coreos_production_vmware_image.vmdk.bz2` somewhere for easy reversion. You can also repack it with another archiver for faster unpacking.
+- Replace `$ETCD_PORT`, `$SSH_PORT` and `$REGISTRY_PORT` with 3 random integers between 1025 and 65535. Use 4001, 22 and 5000 if you don't care.
+- Add hostnames and your SSH key to `user_data.registry.yaml` and `user_data.slave.yaml`.
+
+```Yaml
+- hostname: ${COREOS_HOSTNAME}
+- ssh_authorized_keys:
+  - ${SSH_KEY}
+```
+- use `registry` and `slave` as respective hostnames if you don't care
+- Copy `.vmx` and `.vmdk` to 2 folders: `registry` and `slave`.
+
+### VmWare Player - master node
+
+- Open `.vmx` from `registry/` folder in Vmware Player.
+- Boot the virtual machine. It prints its IP in console. 
+- Replace the `$public_ipv4` in `user_data.registry.yaml`
+- Run `bash make_config_iso.sh user_data.registry.yaml registry`
+- Add a CD-ROM drive, put `registry-config.iso` into it.
+- Shutdown the machine. It shuts down gracefully thanks to preinstalled VmWare tools.
+- Boot it again
+
+### VmWare Player - slave node
+
+- Replace `$REGISTRY_IP` with same ip as `$public_ipv4`
+- Run `bash make_config_iso.sh user_data.slave.yaml slave`
+- Open `.vmx` from `slave/` in VmWare Player. Stop it immediately.
+- Add a CD-ROM drive, put `slave-config.iso` into it.
+- Boot the virtual machine
+
+### VmWare Player - validation of SSH, fleet and etcd setup
+
+- Login using `ssh -P $SSH_PORT core@$public_ipv4`
+- Enter `fleetctl list-machines`. It should show 2 machines.
+
+## CoreOS setup - DigitalOcean
+
+### DigitalOcean - preparations
+
+### DigitalOcean - master node
+
+### DigitalOcean - slave node
+
+### DigitalOcean - validation of SSH, fleet and etcd setup
+
+
+## About The Project
 
 Proposed workflow:
 
@@ -54,3 +105,4 @@ Features:
 `$TOKEN` is not a placeholder either! Use `read TOKEN; export TOKEN` to paste your personal token to a terminal to avoid your token in shell history and similar logs.
 
 `$public_ipv4` is not a placeholder. Well, it is technically a placeholder, but for DigialOcean API.
+
